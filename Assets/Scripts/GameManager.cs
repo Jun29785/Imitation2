@@ -17,10 +17,19 @@ public class GameManager : MonoBehaviour
     [SerializeField] [Range(0,10)]
     private int player_Atk;
     public int Player_Atk { get { return player_Atk; } set { player_Atk = value; } }
+    [SerializeField]
+    private int player_Pain;
+    public int Player_Pain { get { return player_Pain; } set { player_Pain = value; } }
 
     private void Awake()
     {
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
+    }
+
+    private void Update()
+    {
+        Mathf.Clamp(player_Hp, 0, 100);
+        Mathf.Clamp(player_Pain, 0, 100);
     }
 }

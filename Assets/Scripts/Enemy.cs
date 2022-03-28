@@ -12,7 +12,8 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private int atk;
     public int Atk { get { return atk; } set { atk = value; } }
-    [SerializeField] [Range(0, 10f)]
+    [SerializeField]
+    [Range(0, 10f)]
     private float speed;
     public float Speed { get { return speed; } }
 
@@ -33,11 +34,11 @@ public class Enemy : MonoBehaviour
 
     [Header("Enemy Bullet")]
     [SerializeField]
-    private List<GameObject> bullets;
-    public List<GameObject> Bullets { get { return bullets; } }
+    private GameObject bullet;
+    public GameObject Bullet { get { return bullet; } }
 
     bool isEntered = false;
-
+    bool canFire = false;
     GameObject EnemySprite;
 
     private void Awake()
@@ -59,13 +60,18 @@ public class Enemy : MonoBehaviour
         {
             EnemyMove();
         }
+        if (canFire)
+        {
+            canFire = false;
+            EnemyFire();
+        }
     }
 
     void EnemyEnter()
     {
         switch (EnemyType)
         {
-            case EnemyType.Germ:
+            case EnemyType.Germ: // 세균
                 if (transform.position.y > 4f)
                 {
                     transform.Translate(Speed * 1.1f * Time.deltaTime * Vector2.down);
@@ -73,7 +79,16 @@ public class Enemy : MonoBehaviour
                 else
                 {
                     isEntered = true;
-                    EnemyFire();
+                    canFire = true;
+                }
+                break;
+            case EnemyType.Virus: // 바이러스
+                if (transform.position.y < 4f)
+                    transform.Translate(Speed * 2.3f * Time.deltaTime * Vector2.up);
+                else
+                {
+                    isEntered = true;
+                    canFire = true;
                 }
                 break;
             default:
@@ -95,6 +110,9 @@ public class Enemy : MonoBehaviour
             case EnemyType.Germ:
                 transform.Translate(Vector2.down * Speed * Time.deltaTime);
                 break;
+            case EnemyType.Virus:
+                transform.Translate(Vector2.down * Speed * Time.deltaTime);
+                break;
         }
     }
 
@@ -103,26 +121,57 @@ public class Enemy : MonoBehaviour
         switch (EnemyType)
         {
             case EnemyType.Germ:
-                StopCoroutine(GermFirePattern());
-                StartCoroutine(GermFirePattern());
+                GermFire();
+                break;
+            case EnemyType.Virus:
+                if (isEntered)
+                {
+                    StopCoroutine(VirusFirePattern());
+                    StartCoroutine(VirusFirePattern());
+                }
                 break;
         }
     }
 
-    IEnumerator GermFirePattern()
+    IEnumerator VirusFirePattern()
     {
-        for (int i = 0, term = -90; i < 6; i++,term += 30)
+        for (int i = 0, term = -90; i < 6; i++, term += 30)
         {
-            GameObject obj = (GameObject)Instantiate(Bullets[0]);
+            GameObject obj = (GameObject)Instantiate(Bullet);
+            obj.GetComponent<EnemyBullet>().Atk = Atk;
             obj.transform.position = FirePos.position;
             if (obj.transform.position.x >= 0)
                 obj.transform.rotation = Quaternion.Euler(0, 0, term);
             else
                 obj.transform.rotation = Quaternion.Euler(0, 0, -term);
-            // Enemy Bullet Direction Settings
-            //obj.GetComponent<EnemyBullet>().Direction = Vector2.down;
-            yield return new WaitForSeconds(0.7f);
+            obj.GetComponent<EnemyBullet>().Direction = Vector2.down;
+            yield return new WaitForSeconds(0.04f);
         }
-        Invoke("EnemyFire", 2f);
+        Invoke("EnemyFire", Random.Range(0.5f, 1.7f));
+    }
+
+    void GermFire()
+    {
+        GameObject obj = (GameObject)Instantiate(bullet);
+        obj.transform.position = FirePos.position;
+        Transform player = GameObject.FindGameObjectWithTag("Player").transform;
+        Vector3 direction = (player.position - obj.transform.position).normalized;
+        obj.GetComponent<EnemyBullet>().Direction = direction;
+        Invoke("EnemyFire", Random.Range(0.2f, 1.5f));
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            // 플레이어와 닿으면 데미지의 절반
+            GameManager.Instance.Player_Hp -= Atk;
+        }
+        if (collision.CompareTag("despawn"))
+        {
+            // 디스폰 벽에 닿으면 삭제 및 고통 게이지 증가
+            Destroy(this.gameObject);
+            GameManager.Instance.Player_Pain += (Atk / 2);
+        }
     }
 }

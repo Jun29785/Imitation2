@@ -36,7 +36,8 @@ public class EnemyBullet : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            GameManager.Instance
+            GameManager.Instance.Player_Hp -= Atk;
+            Destroy(this.gameObject);
         }
     }
 }
