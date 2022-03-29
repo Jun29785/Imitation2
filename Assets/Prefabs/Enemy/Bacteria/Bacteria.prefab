@@ -47,8 +47,10 @@ MonoBehaviour:
   hp: 10
   atk: 4
   speed: 10
+  firePos: {fileID: 0}
   enemyType: 0
   direction: -1
+  bullet: {fileID: 0}
 --- !u!1 &216975291314218862
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,6 +98,7 @@ SpriteRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -119,7 +122,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 8
   m_Sprite: {fileID: 8414478535512612329, guid: 138040323294fd440a3a823e5d70ad01,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

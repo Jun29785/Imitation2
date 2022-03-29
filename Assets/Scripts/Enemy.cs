@@ -9,9 +9,11 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private int hp;
     public int Hp { get { return hp; } set { hp = value; } }
+
     [SerializeField]
     private int atk;
     public int Atk { get { return atk; } set { atk = value; } }
+
     [SerializeField]
     [Range(0, 10f)]
     private float speed;
@@ -40,6 +42,9 @@ public class Enemy : MonoBehaviour
     bool isEntered = false;
     bool canFire = false;
     GameObject EnemySprite;
+
+    float turnTimer = 0;
+    Vector2 Dir;
 
     private void Awake()
     {
@@ -91,6 +96,15 @@ public class Enemy : MonoBehaviour
                     canFire = true;
                 }
                 break;
+            case EnemyType.Cancer:
+                if (transform.position.y > 4f)
+                    transform.Translate(speed * 1.3f * Time.deltaTime * Vector2.down);
+                else
+                {
+                    isEntered = true;
+                    canFire = true;
+                }
+                break;
             default:
                 isEntered = true;
                 break;
@@ -112,6 +126,9 @@ public class Enemy : MonoBehaviour
                 break;
             case EnemyType.Virus:
                 transform.Translate(Vector2.down * Speed * Time.deltaTime);
+                break;
+            case EnemyType.Cancer:
+                CancerMove();
                 break;
         }
     }
@@ -160,6 +177,21 @@ public class Enemy : MonoBehaviour
         Invoke("EnemyFire", Random.Range(0.2f, 1.5f));
     }
 
+    void CancerMove()
+    {
+        // 계단 형식 지그재그 이동
+        turnTimer += Time.deltaTime;
+        if (turnTimer > 1f)
+        {
+            Dir = Vector2.down;
+        }
+        else if(turnTimer > .5f)
+        {
+            Dir = new Vector2((float)Direction, 0);
+        }
+        transform.Translate(Dir * Speed * Time.deltaTime);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
@@ -167,7 +199,7 @@ public class Enemy : MonoBehaviour
             // 플레이어와 닿으면 데미지의 절반
             GameManager.Instance.Player_Hp -= Atk;
         }
-        if (collision.CompareTag("despawn"))
+        if (collision.CompareTag("despawn") && isEntered)
         {
             // 디스폰 벽에 닿으면 삭제 및 고통 게이지 증가
             Destroy(this.gameObject);
