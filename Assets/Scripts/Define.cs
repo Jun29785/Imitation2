@@ -26,5 +26,17 @@
         Right = 1
     }
 
+    public enum ItemType
+    {
+        BulletUpgrade,
+        God,
+        Heal,
+        Pain,
+    }
 
+    public enum NpcType
+    {
+        WhiteBloodCell,
+        RedBloodCell
+    }
 }

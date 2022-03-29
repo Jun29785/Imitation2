@@ -19,6 +19,11 @@ public class Enemy : MonoBehaviour
     private float speed;
     public float Speed { get { return speed; } }
 
+    [SerializeField]
+    [Range(0, 50)]
+    private int score;
+    public int Score { get { return score; } set { score = value; } }
+
     [Header("FirePos")]
     [SerializeField]
     private Transform firePos;
@@ -49,6 +54,7 @@ public class Enemy : MonoBehaviour
     private void Awake()
     {
         EnemySprite = transform.GetChild(0).gameObject;
+        Dir = new Vector2((float)Direction, 0);
     }
 
     void Start()
@@ -58,9 +64,11 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        //Debug.Log("Enemy HP : " + Hp);
         if (!(Hp > 0))
+        {
+            GameManager.Instance.GameScore += Score;
             Destroy(this.gameObject);
+        }
         if (isEntered)
         {
             EnemyMove();
@@ -96,7 +104,7 @@ public class Enemy : MonoBehaviour
                     canFire = true;
                 }
                 break;
-            case EnemyType.Cancer:
+            case EnemyType.Cancer: // 암세포
                 if (transform.position.y > 4f)
                     transform.Translate(speed * 1.3f * Time.deltaTime * Vector2.down);
                 else
@@ -141,11 +149,11 @@ public class Enemy : MonoBehaviour
                 GermFire();
                 break;
             case EnemyType.Virus:
-                if (isEntered)
-                {
-                    StopCoroutine(VirusFirePattern());
-                    StartCoroutine(VirusFirePattern());
-                }
+                StopCoroutine(VirusFirePattern());
+                StartCoroutine(VirusFirePattern());
+                break;
+            case EnemyType.Cancer:
+                CancerFire();
                 break;
         }
     }
@@ -184,12 +192,26 @@ public class Enemy : MonoBehaviour
         if (turnTimer > 1f)
         {
             Dir = Vector2.down;
+            turnTimer = 0f;
         }
-        else if(turnTimer > .5f)
+        else if (turnTimer > .4f)
         {
             Dir = new Vector2((float)Direction, 0);
         }
         transform.Translate(Dir * Speed * Time.deltaTime);
+    }
+
+    void CancerFire()
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            GameObject obj = (GameObject)Instantiate(Bullet);
+            obj.transform.position = FirePos.position;
+            obj.GetComponent<EnemyBullet>().Atk = Atk;
+            obj.transform.rotation = Quaternion.Euler(0, 0, 360 - (i * 30));
+            obj.GetComponent<EnemyBullet>().Direction = Vector2.up;
+        }
+        Invoke("EnemyFire", 1f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

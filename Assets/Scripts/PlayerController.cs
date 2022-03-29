@@ -12,8 +12,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Player Bullet")]
     [SerializeField]
-    private GameObject bullet;
-    public GameObject Bullet { get { return bullet; } }
+    private List<GameObject> bullets;
+    public List<GameObject> Bullets { get { return bullets; } }
 
     [Header("Player Fire Position")]
     [SerializeField]
@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
         {
             GameManager.Instance.isFire = true;
             // Bullet Create
-            GameObject obj = (GameObject)Instantiate(Bullet);
+            GameObject obj = (GameObject)Instantiate(Bullets[GameManager.Instance.Player_Bullet]);
             obj.transform.position = FirePos.position;
         }
     }

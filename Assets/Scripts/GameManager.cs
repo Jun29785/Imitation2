@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
     public bool isFire;
     public float FireTimer;
 
+    public int GameScore;
+
     [Header("Player Stats")]
     [SerializeField]
     [Range(0, 100)]
@@ -20,11 +22,15 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int player_Pain;
     public int Player_Pain { get { return player_Pain; } set { player_Pain = value; } }
+    [SerializeField]
+    private int player_Bullet;
+    public int Player_Bullet { get { return player_Bullet; } set { player_Bullet = value; } }
 
     private void Awake()
     {
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
+        Player_Bullet = 0;
     }
 
     private void Update()
